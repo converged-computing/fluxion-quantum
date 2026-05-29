@@ -1,0 +1,38 @@
+# Requesting an entire rack
+version: 9999
+resources:
+  - type: cluster
+    count: 1
+    with:
+    - type: qdevice
+      count: 1
+      with:
+      - type: qpu
+        count: 1
+        with:
+        - type: qubit
+          count: 2
+        - type: coupler
+          count: 1
+    - type: rack
+      count: 1
+      with:
+      - type: slot
+        count: 1
+        label: default
+        with:
+        - type: node
+          count: 2
+          with:
+          - type: socket
+            count: 1
+            with:
+            - type: core
+              count: 1
+
+attributes:
+tasks:
+  - command: ["app"]
+    slot: default
+    count: 
+      per_slot: 1
