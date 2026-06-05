@@ -1,0 +1,19 @@
+# Request a single virtual quantum resource (one IBM backend) from the
+# quantum-virtual.json graph. Fluxion matches a `qpu` vertex; its name is the
+# QRMI backend the job is then submitted to via qrmi-go.
+version: 9999
+resources:
+  - type: slot
+    count: 1
+    label: default
+    with:
+      - type: qpu
+        count: 1
+ 
+attributes:
+tasks:
+  - command: ["sampler"]
+    slot: default
+    count:
+      per_slot: 1
+ 

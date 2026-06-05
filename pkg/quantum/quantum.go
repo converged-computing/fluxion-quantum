@@ -5,6 +5,7 @@ import "fmt"
 type MatchAllocateRequest struct {
 	Number     uint64
 	Allocation string
+	Spec       string
 }
 
 func (i *MatchAllocateRequest) Satisfied() bool {

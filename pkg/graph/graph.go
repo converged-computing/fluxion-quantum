@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/converged-computing/fluxion-quantum/src/quantum"
+	"github.com/converged-computing/fluxion-quantum/pkg/quantum"
 	"github.com/flux-framework/flux-sched/resource/reapi/bindings/go/src/fluxcli"
 
 	"fmt"
@@ -22,16 +22,22 @@ Desired steps:
 
 */
 
-type FlexGraph struct {
+type FluxionGraph struct {
 	cli *fluxcli.ReapiClient
+
+	// MatchFormat selects the Fluxion allocation output format ("simple",
+	// "jgf", "rv1", ...). Empty defaults to "simple" (human-readable tree).
+	// Set it to "jgf" when you need to parse the allocation programmatically
+	// (e.g. quantum.BackendFromAllocation).
+	MatchFormat string
 }
 
 // Init a new FlexGraph from a graphml filename
-func (f *FlexGraph) Init(confFile string, matchPolicy string, label string) {
+func (f *FluxionGraph) Init(confFile string, matchPolicy string, label string) {
 
 	// 1. instantiate fluxion
 	f.cli = fluxcli.NewReapiClient()
-	fmt.Printf("Created fluxion resource graph %x\n", *f.cli)
+	fmt.Println("Created fluxion resource graph")
 
 	// 2. Load in the resource graph
 	conf, err := os.ReadFile(confFile)
@@ -45,17 +51,24 @@ func (f *FlexGraph) Init(confFile string, matchPolicy string, label string) {
 		matchPolicy = "first"
 	}
 
+	// Allocation output format; default to the human-readable tree.
+	matchFormat := f.MatchFormat
+	if matchFormat == "" {
+		matchFormat = "simple"
+	}
+
 	// Alert the user to all the chosen parameters
 	fmt.Printf("  Match policy: %s\n", matchPolicy)
 	fmt.Println("  Load format: JGF (jgf)")
+	fmt.Printf("  Match format: %s\n", matchFormat)
 	fmt.Printf("  Config file: %s\n", confFile)
 
 	// 2. Create the context, specify instead of JGF (default) we want graphml
 	// 3. Remainder of defaults should work out of the box
 	// Note that the options get passed as a json string to here:
 	// https://github.com/flux-framework/flux-sched/blob/master/resource/reapi/bindings/c%2B%2B/reapi_cli_impl.hpp#L412
-	opts := `{"matcher_policy": "%s", "load_file": "%s", "load_format": "jgf", "match_format": "simple"}`
-	p := fmt.Sprintf(opts, matchPolicy, confFile)
+	opts := `{"matcher_policy": "%s", "load_file": "%s", "load_format": "jgf", "match_format": "%s"}`
+	p := fmt.Sprintf(opts, matchPolicy, confFile, matchFormat)
 
 	// 4. Then pass in a jobspec... err, ice cream request :)
 	err = f.cli.InitContext(string(conf), p)
@@ -65,17 +78,23 @@ func (f *FlexGraph) Init(confFile string, matchPolicy string, label string) {
 	fmt.Printf("\n✨️ Init context complete!\n")
 }
 
-// MatchAllocate attempts to match allocate
-func (f *FlexGraph) MatchAllocate(specFile string) (quantum.MatchAllocateRequest, error) {
-	fmt.Printf("   🌀 Request: %s\n", specFile)
-	request := quantum.MatchAllocateRequest{}
-
+// MatchAllocate reads a jobspec file (YAML or JSON) and match-allocates it.
+func (f *FluxionGraph) MatchAllocate(specFile string) (quantum.MatchAllocateRequest, error) {
 	spec, err := os.ReadFile(specFile)
 	if err != nil {
-		return request, errors.New("Error reading jobspec")
+		return quantum.MatchAllocateRequest{}, errors.New("Error reading jobspec")
 	}
+	fmt.Printf("   🌀 Request (file): %s\n", specFile)
+	return f.MatchAllocateSpec(string(spec))
+}
 
-	reserved, allocated, time_at, overhead, jobid, err := f.cli.MatchAllocate(false, string(spec))
+// MatchAllocateSpec match-allocates against a jobspec provided as a string.
+// Fluxion accepts YAML or JSON; use the jobspec package to convert/normalize if
+// needed before calling this.
+func (f *FluxionGraph) MatchAllocateSpec(spec string) (quantum.MatchAllocateRequest, error) {
+	request := quantum.MatchAllocateRequest{}
+
+	reserved, allocated, time_at, overhead, jobid, err := f.cli.MatchAllocate(false, spec)
 	if err != nil {
 		return request, err
 	}
@@ -91,7 +110,7 @@ func (f *FlexGraph) MatchAllocate(specFile string) (quantum.MatchAllocateRequest
 }
 
 // Satisfy determines if we can satisfy
-func (f *FlexGraph) Satisfy(specFile string) (bool, error) {
+func (f *FluxionGraph) Satisfy(specFile string) (bool, error) {
 	fmt.Printf("   🌀 Request: %s\n", specFile)
 
 	spec, err := os.ReadFile(specFile)

@@ -42,6 +42,32 @@ RUN sudo apt-get update \
     ripgrep \
     libczmq-dev
 
+
+# --- Rust (for building QRMI) --------------------------------------------
+# Installed system-wide so it is available regardless of the active user.
+# QRMI pins its toolchain via rust-toolchain.toml (currently 1.91); rustup will
+# fetch that automatically during the build below.
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+      | sh -s -- -y --no-modify-path --profile minimal --default-toolchain 1.91 \
+ && chmod -R a+rwX /usr/local/rustup /usr/local/cargo
+
+ # --- QRMI native library (the bindings' cgo dependency) ------------------
+# Pin QRMI_REF to a tag/commit for reproducibility if you like; defaults to main.
+ARG QRMI_REPO=https://github.com/qiskit-community/qrmi
+ARG QRMI_REF=main
+RUN git clone ${QRMI_REPO} /opt/qrmi \
+ && cd /opt/qrmi \
+ && git checkout ${QRMI_REF} \
+ && cargo build --locked --release \
+ && install -d /usr/local/include /usr/local/lib \
+ && install -m 0644 qrmi.h /usr/local/include/qrmi.h \
+ && install -m 0644 target/release/libqrmi.a /usr/local/lib/libqrmi.a \
+ && install -m 0755 target/release/libqrmi.so /usr/local/lib/libqrmi.so \
+ && ldconfig
+
 # Add the group and user that match our ids
 RUN groupadd -g ${USER_GID} ${USERNAME} && \
     adduser --disabled-password --uid ${USER_UID} --gid ${USER_GID} --gecos "" ${USERNAME} && \
@@ -59,4 +85,5 @@ RUN ln -s /usr/local/go/bin/go /usr/bin/go && \
     cd ../ && \
     make && make install
 
+ENV LD_LIBRARY_PATH=/usr/lib:/opt/flux-sched/resource:/opt/flux-sched/resource/reapi/bindings:/opt/flux-sched/resource/libjobspec
 USER $USERNAME

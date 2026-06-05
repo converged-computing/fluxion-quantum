@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/converged-computing/fluxion-quantum/src/graph"
+	"github.com/converged-computing/fluxion-quantum/pkg/graph"
 )
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	// Create an ice cream graph, and match the spec to it.
-	g := graph.FlexGraph{}
+	g := graph.FluxionGraph{}
 	g.Init(confFile, *matchPolicy, "")
 
 	if *satisfy {
