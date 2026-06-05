@@ -1,0 +1,93 @@
+{
+    "graph": {
+        "nodes": [
+            {
+                "id": "0",
+                "metadata": {
+                    "type": "cluster",
+                    "basename": "tiny",
+                    "name": "tiny0",
+                    "id": 0,
+                    "uniq_id": 0,
+                    "rank": -1,
+                    "exclusive": false,
+                    "unit": "",
+                    "size": 1,
+                    "paths": { "containment": "/tiny0" }
+                }
+            },
+            {
+                "id": "1",
+                "metadata": {
+                    "type": "qgateway",
+                    "basename": "qgateway",
+                    "name": "qgateway0",
+                    "id": 0,
+                    "uniq_id": 1,
+                    "rank": -1,
+                    "exclusive": false,
+                    "unit": "",
+                    "size": 1,
+                    "vendor": "ibm",
+                    "endpoint": "https://quantum.cloud.ibm.com/api/v1",
+                    "paths": { "containment": "/tiny0/qgateway0" }
+                }
+            },
+            {
+                "id": "2",
+                "metadata": {
+                    "type": "qpu",
+                    "basename": "qpu",
+                    "name": "ibm_fez",
+                    "id": 0,
+                    "uniq_id": 2,
+                    "rank": -1,
+                    "exclusive": true,
+                    "unit": "",
+                    "size": 1,
+                    "vendor": "ibm",
+                    "qrmi_type": "qiskit-runtime-service",
+                    "num_qubits": 156,
+                    "topology": "heavy-hex",
+                    "paths": { "containment": "/tiny0/qgateway0/ibm_fez" }
+                }
+            },
+            {
+                "id": "3",
+                "metadata": {
+                    "type": "qpu",
+                    "basename": "qpu",
+                    "name": "ibm_marrakesh",
+                    "id": 1,
+                    "uniq_id": 3,
+                    "rank": -1,
+                    "exclusive": true,
+                    "unit": "",
+                    "size": 1,
+                    "vendor": "ibm",
+                    "qrmi_type": "qiskit-runtime-service",
+                    "num_qubits": 156,
+                    "topology": "heavy-hex",
+                    "paths": { "containment": "/tiny0/qgateway0/ibm_marrakesh" }
+                }
+            }
+        ],
+        "edges": [
+            {
+                "source": "0",
+                "target": "1",
+                "metadata": { "subsystem": "containment" }
+            },
+            {
+                "source": "1",
+                "target": "2",
+                "metadata": { "subsystem": "containment" }
+            },
+            {
+                "source": "1",
+                "target": "3",
+                "metadata": { "subsystem": "containment" }
+            }
+        ]
+    }
+}

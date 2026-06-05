@@ -127,6 +127,112 @@ Created fluxion resource graph {96bdaf0}
 
 We would next want to DO something with that allocation! :)
 
+### Quantum
+
+Test quantum
+
+```bash
+make test-quantum
+```
+
+And then build and run with `fluxion-quantum`
+
+```bash
+./bin/fluxion-quantum -conf conf/quantum-virtual.json -spec queries/quantum-virtual.yaml
+```
+```console
+This is the fluxion quantum resource matcher
+Created fluxion resource graph {15eceaf0}
+  Match policy: first
+  Load format: JGF (jgf)
+  Config file: conf/quantum-virtual.json
+
+✨️ Init context complete!
+   🌀 Request: queries/quantum-virtual.yaml
+  JobID    : 1
+  Reserved : false
+  Overhead : 0.000586 seconds
+  Time at  : 0
+  Allocated :
+      ---------ibm_marrakesh[1:x]
+      ------qgateway0[1:s]
+      ---tiny0[1:s]
+
+
+😋 Your resources are satisfied.
+```
+
+And add `--satisfy` to check that. This isn't running a real job, it is just querying the resource graph. Let's do that next. To login I usually do:
+
+```bash
+curl -fsSL https://clis.cloud.ibm.com/install/linux | sudo sh
+ibmcloud login --apikey <key>
+# 12 for us-east
+```
+
+```bash
+export IBM_CLOUD_TOKEN=<key>
+export QRMI_TEST_BACKEND=ibm_fez 
+export QRMI_TEST_TYPE=qiskit-runtime-service
+export IBM_CLOUD_CRN=$(ibmcloud resource service-instances --service-name quantum-computing --output json | jq -r '.[] | {name: .name, crn: .crn}' | jq -r .crn)
+```
+
+And now test with the live example.
+
+```bash
+export QRMI_QRS_SESSION_MAX_TTL=600     # 10m
+make test-quantum-live
+```
+```console
+CGO_ENABLED=1 CGO_CFLAGS="-I/opt/flux-sched -I/usr/local/include" CGO_LDFLAGS="-L/opt/flux-sched/resource -L/opt/flux-sched/resource/libjobspec -L/opt/flux-sched/resource/reapi/bindings -L/usr/local/lib -lresource -ljobspec_conv -lreapi_cli -lflux-idset -lstdc++ -lczmq -ljansson -lhwloc -lboost_system -lflux-hostlist -lboost_graph -lyaml-cpp" \
+  go test -tags cgo_qrmi -v -run 'TestMatchAndRunSampler|TestRunSamplerLive' ./pkg/...
+=== RUN   TestMatchAndRunSampler
+Created fluxion resource graph
+  Match policy: first
+  Load format: JGF (jgf)
+  Match format: jgf
+  Config file: /workspaces/fluxion-quantum/conf/quantum-virtual.json
+
+✨️ Init context complete!
+  JobID    : 1
+  Reserved : false
+  Overhead : 0.000344 seconds
+  Time at  : 0
+  Allocated :
+{"graph": {"nodes": [{"id": "3", "metadata": {"type": "qpu", "name": "ibm_marrakesh", "id": 1, "rank": -1, "exclusive": true, "paths": {"containment": "/tiny0/qgateway0/ibm_marrakesh"}}}, {"id": "1", "metadata": {"type": "qgateway", "id": 0, "rank": -1, "paths": {"containment": "/tiny0/qgateway0"}}}, {"id": "0", "metadata": {"type": "cluster", "basename": "tiny", "id": 0, "rank": -1, "paths": {"containment": "/tiny0"}}}], "edges": [{"source": "1", "target": "3"}, {"source": "0", "target": "1"}]}}
+
+    match_run_test.go:69: submitting to Fluxion-allocated backend: "ibm_marrakesh"
+    match_run_test.go:91: sampler result from ibm_marrakesh: 2070 bytes
+--- PASS: TestMatchAndRunSampler (11.18s)
+PASS
+ok      github.com/converged-computing/fluxion-quantum/pkg/graph        (cached)
+testing: warning: no tests to run
+PASS
+ok      github.com/converged-computing/fluxion-quantum/pkg/jobspec      (cached) [no tests to run]
+testing: warning: no tests to run
+PASS
+ok      github.com/converged-computing/fluxion-quantum/pkg/quantum      0.005s [no tests to run]
+```
+
+In the above, what happens? This is what I think. We got a 2070 byte sampler result back from `ibm_marrakesh` in ~11 seconds. This includes:
+
+- Fluxion loading the virtual resource graph, matching the jobspec, and allocating a qpu vertex. 
+- qmri-go submitted the SamplerV2 job to IBM and got back the result.
+
+E.g., `graph → match → allocate → QRMI job → result`
+
+And next we can actually integrate this into Kubernetes, paried with traditional resources, and likely a custom scheduler plugin. Stay tuned!
+
+### Debugging
+
+When I first tested a session I was getting 400 errors, and I needed more detail. I ran:
+
+```bash
+bash ./test/debug_request.sh
+```
+
+And it told me exactly what I needed to know - my account did not have scope to request a session!
+
 ## License
 
 HPCIC DevTools is distributed under the terms of the MIT license.
