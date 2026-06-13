@@ -55,7 +55,6 @@ Note that the resource graph is a modified [tiny.json](https://raw.githubusercon
 ./bin/fluxion-quantum --spec ./queries/cores-nested.yaml
 ```
 ```console
- ./bin/fluxion-quantum --spec ./queries/cores-nested.yaml 
 This is the fluxion quantum resource matcher
 Created fluxion resource graph {1d538af0}
   Match policy: first
@@ -96,20 +95,21 @@ You can do an a-la-carte, satisfy only request (no allocate):
 This models quantum resources `qdevice` alongside a rack.
 
 ```bash
-./bin/fluxion-quantum --spec ./queries/quantum-cores-nested.yaml
+ ./bin/fluxion-quantum --spec ./queries/quantum-rack-nested.yaml 
 ```
 ```console
 This is the fluxion quantum resource matcher
-Created fluxion resource graph {96bdaf0}
+Created fluxion resource graph
   Match policy: first
   Load format: JGF (jgf)
+  Match format: simple
   Config file: conf/quantum.json
 
 ✨️ Init context complete!
-   🌀 Request: ./queries/quantum-cores-nested.yaml
+   🌀 Request (file): ./queries/quantum-rack-nested.yaml
   JobID    : 1
   Reserved : false
-  Overhead : 0.000595 seconds
+  Overhead : 0.000613 seconds
   Time at  : 0
   Allocated :
       ---------------core35[1:x]
@@ -118,9 +118,13 @@ Created fluxion resource graph {96bdaf0}
       ---------------core35[1:x]
       ------------socket1[1:x]
       ---------node1[1:x]
-      ------rack0[1:s]
+      ------rack0[1:x]
+      ------------q0[1:x]
+      ------------q1[1:x]
+      ------------c0_1[1:x]
+      ---------qpu0[1:x]
+      ------qdevice0[1:x]
       ---tiny0[1:s]
-
 
 😋 Your resources are satisfied.
 ```
