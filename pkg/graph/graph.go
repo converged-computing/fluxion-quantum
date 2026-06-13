@@ -54,7 +54,7 @@ func (f *FluxionGraph) Init(confFile string, matchPolicy string, label string) {
 	// Allocation output format; default to the human-readable tree.
 	matchFormat := f.MatchFormat
 	if matchFormat == "" {
-		matchFormat = "simple"
+		matchFormat = "pretty_simple"
 	}
 
 	// Alert the user to all the chosen parameters
