@@ -1,0 +1,64 @@
+name: test fluxion-quantum
+
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+
+jobs:
+  matcher-queries:
+    runs-on: ubuntu-latest
+    # The flux-core base image already has flux + build deps; we compile
+    # flux-sched (the matcher) into it. This is the same toolchain the
+    # .devcontainer uses, minus Rust/QRMI (not needed for the matcher tests).
+    container:
+      image: vanessa/fluxion-quantum:latest
+      options: --user root
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build fluxion-quantum
+        run: make
+
+      # Pure-Go unit tests from the README (no native libs, no API calls).
+      - name: Unit tests (quantum + jobspec)
+        run: make test-quantum
+
+      # Matcher query tests. Each command uses --retval so the process exit code
+      # reflects the match outcome (0 = satisfied/allocated, non-zero = not).
+      # We assert each return code against its expectation.
+      - name: Query tests (expected to SUCCEED, rc=0)
+        env:
+          LD_LIBRARY_PATH: /usr/lib:/opt/flux-sched/resource:/opt/flux-sched/resource/reapi/bindings:/opt/flux-sched/resource/libjobspec
+          CONF: conf/quantum-vendors.json
+        run: |
+          set -u
+
+          # expected satisfied / allocated -> rc=0 ---
+          ./bin/fluxion-quantum --conf "$CONF" --spec queries/cores-simple.yaml --retval
+          ./bin/fluxion-quantum --conf ./conf/quantum.json --spec queries/cores-nested.yaml --retval
+          ./bin/fluxion-quantum --conf "$CONF" --spec queries/device-region-east.yaml --retval
+          ./bin/fluxion-quantum --conf "$CONF" --spec queries/no-constraint-qpu.yaml --retval
+          ./bin/fluxion-quantum --conf "$CONF" --spec queries/virtual-false.yaml --retval
+          ./bin/fluxion-quantum --conf "$CONF" --spec queries/virtual-true.yaml --retval
+
+          # expected NOT satisfiable -> rc=1 ---
+          (./bin/fluxion-quantum --conf "$CONF" --spec queries/device-region-missing.yaml --retval && exit 1) || true
+          (./bin/fluxion-quantum --conf "$CONF" --spec queries/hybrid-constraint.yaml --retval && exit 1) || true
+          (./bin/fluxion-quantum --conf "$CONF" --spec queries/unsatisfied-cores.yaml --retval && exit 1)|| true
+
+
+      # The region filter must select the CORRECT backend, not just any. This
+      # checks the allocation names rigetti_east and not ibm_west.
+      - name: Region filter selects the right backend
+        env:
+          LD_LIBRARY_PATH: /usr/lib:/opt/flux-sched/resource:/opt/flux-sched/resource/reapi/bindings:/opt/flux-sched/resource/libjobspec
+          CONF: conf/quantum-vendors.json
+        run: |
+          out=$(./bin/fluxion-quantum --conf "$CONF" --spec queries/device-region-east.yaml)
+          echo "$out"
+          echo "$out" | grep -q rigetti_east || { echo "FAIL: expected rigetti_east in allocation"; exit 1; }
+          if echo "$out" | grep -q ibm_west; then echo "FAIL: region filter leaked to ibm_west"; exit 1; fi
+          echo "ok: region=us-east-1 selected rigetti_east"

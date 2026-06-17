@@ -1,0 +1,21 @@
+# EXPECT: SATISFIED, and the allocated qdevice MUST be rigetti_east (us-east-1).
+# Proves: a composed attribute property prunes to the matching backend by VALUE
+# (value encoded in the key, since RFC 31 match is key-presence only).
+version: 9999
+resources:
+  - type: slot
+    count: 1
+    label: device
+    with:
+      - type: qpu
+        count: 1
+attributes:
+  system:
+    duration: 0
+    constraints:
+      properties: ["virtual=true", "fluxion.flux-framework.org/region=us-east-1"]
+tasks:
+  - command: ["sampler"]
+    slot: device
+    count:
+      per_slot: 1

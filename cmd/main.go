@@ -15,6 +15,7 @@ func main() {
 	specFilePath := flag.String("spec", "", "JobSpec (yaml file) that defines ice cream request")
 	matchPolicy := flag.String("policy", "first", "Match policy (defaults to first)")
 	satisfy := flag.Bool("satisfy", false, "Request that the spec be assessed for satisfiability")
+	retval := flag.Bool("retval", false, "Return value should reflect match success/failure")
 	flag.Parse()
 
 	specFile := *specFilePath
@@ -42,10 +43,8 @@ func main() {
 
 	if *satisfy {
 		satisfied, err := g.Satisfy(specFile)
-		if err != nil {
-			fmt.Printf("The request cannot be satisfied: %s\n", err)
-			return
-		}
+		// Exit on not satisfied
+		exitOnError(err, *retval)
 		if satisfied {
 			fmt.Printf("\n😋 Your resources are satisfied.\n")
 		} else {
@@ -53,12 +52,29 @@ func main() {
 		}
 
 	} else {
+		// Always an error if not satsified?
 		allocation, err := g.MatchAllocate(specFile)
-		if err != nil {
-			fmt.Printf("The request cannot be satisfied: %s\n", err)
-			return
-		}
+		exitOnError(err, *retval)
 		allocation.Show()
+		exitNotSatisfied(allocation.Satisfied(), *retval)
+	}
+}
 
+// notSatisfied is a shared function to exit based on result and
+// request for a return value
+func exitNotSatisfied(satisfied, exitRetVal bool) {
+	if !satisfied {
+		if exitRetVal {
+			os.Exit(1)
+		}
+	}
+}
+
+func exitOnError(err error, exitRetVal bool) {
+	if err != nil {
+		fmt.Printf("The request cannot be satisfied: %s\n", err)
+		if exitRetVal {
+			os.Exit(1)
+		}
 	}
 }
