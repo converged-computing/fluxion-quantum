@@ -1,0 +1,23 @@
+# EXPECT: NOT SATISFIED. Single global constraint virtual=false prunes the
+# virtual nodes, so the qpu under them is unreachable. This proves the
+# two-match design is necessary (one jobspec = one global constraint).
+version: 9999
+resources:
+  - type: slot
+    count: 1
+    label: default
+    with:
+      - type: core
+        count: 1
+      - type: qpu
+        count: 1
+attributes:
+  system:
+    duration: 0
+    constraints:
+      properties: ["virtual=false"]
+tasks:
+  - command: ["app"]
+    slot: default
+    count:
+      per_slot: 1

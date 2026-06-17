@@ -1,0 +1,20 @@
+# EXPECT: SATISFIED. A qpu under a virtual=true node (rigetti_east or ibm_west).
+# Proves: virtual=true selects a virtual backend node and prunes physical nodes.
+version: 9999
+resources:
+  - type: slot
+    count: 1
+    label: device
+    with:
+      - type: qpu
+        count: 1
+attributes:
+  system:
+    duration: 0
+    constraints:
+      properties: ["virtual=true"]
+tasks:
+  - command: ["sampler"]
+    slot: device
+    count:
+      per_slot: 1

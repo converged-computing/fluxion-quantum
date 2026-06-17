@@ -1,0 +1,281 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "id": "0",
+        "metadata": {
+          "type": "cluster",
+          "basename": "cluster",
+          "name": "cluster0",
+          "id": 0,
+          "uniq_id": 0,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0"
+          }
+        }
+      },
+      {
+        "id": "1",
+        "metadata": {
+          "type": "node",
+          "basename": "node",
+          "name": "node0",
+          "id": 1,
+          "uniq_id": 1,
+          "rank": 0,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0/node0"
+          },
+          "properties": {
+            "virtual=false": ""
+          }
+        }
+      },
+      {
+        "id": "2",
+        "metadata": {
+          "type": "core",
+          "basename": "core",
+          "name": "core0",
+          "id": 2,
+          "uniq_id": 2,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 4,
+          "paths": {
+            "containment": "/cluster0/node0/core0"
+          }
+        }
+      },
+      {
+        "id": "3",
+        "metadata": {
+          "type": "node",
+          "basename": "node",
+          "name": "node1",
+          "id": 3,
+          "uniq_id": 3,
+          "rank": 1,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0/node1"
+          },
+          "properties": {
+            "virtual=false": ""
+          }
+        }
+      },
+      {
+        "id": "4",
+        "metadata": {
+          "type": "core",
+          "basename": "core",
+          "name": "core0",
+          "id": 4,
+          "uniq_id": 4,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 4,
+          "paths": {
+            "containment": "/cluster0/node1/core0"
+          }
+        }
+      },
+      {
+        "id": "5",
+        "metadata": {
+          "type": "node",
+          "basename": "node",
+          "name": "rigetti_east",
+          "id": 5,
+          "uniq_id": 5,
+          "rank": 2,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0/rigetti_east"
+          },
+          "properties": {
+            "virtual=true": "",
+            "class=qdevice": "",
+            "fluxion.flux-framework.org/region=us-east-1": ""
+          }
+        }
+      },
+      {
+        "id": "6",
+        "metadata": {
+          "type": "qpu",
+          "basename": "qpu",
+          "name": "rigetti_east_qpu",
+          "id": 6,
+          "uniq_id": 6,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0/rigetti_east/rigetti_east_qpu"
+          }
+        }
+      },
+      {
+        "id": "7",
+        "metadata": {
+          "type": "qubit",
+          "basename": "qubit",
+          "name": "qubit0",
+          "id": 7,
+          "uniq_id": 7,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 80,
+          "paths": {
+            "containment": "/cluster0/rigetti_east/rigetti_east_qpu/qubit0"
+          }
+        }
+      },
+      {
+        "id": "8",
+        "metadata": {
+          "type": "node",
+          "basename": "node",
+          "name": "ibm_west",
+          "id": 8,
+          "uniq_id": 8,
+          "rank": 3,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0/ibm_west"
+          },
+          "properties": {
+            "virtual=true": "",
+            "class=qdevice": "",
+            "fluxion.flux-framework.org/region=us-west-2": ""
+          }
+        }
+      },
+      {
+        "id": "9",
+        "metadata": {
+          "type": "qpu",
+          "basename": "qpu",
+          "name": "ibm_west_qpu",
+          "id": 9,
+          "uniq_id": 9,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 1,
+          "paths": {
+            "containment": "/cluster0/ibm_west/ibm_west_qpu"
+          }
+        }
+      },
+      {
+        "id": "10",
+        "metadata": {
+          "type": "qubit",
+          "basename": "qubit",
+          "name": "qubit0",
+          "id": 10,
+          "uniq_id": 10,
+          "rank": -1,
+          "exclusive": false,
+          "unit": "",
+          "size": 127,
+          "paths": {
+            "containment": "/cluster0/ibm_west/ibm_west_qpu/qubit0"
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "0",
+        "target": "1",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "1",
+        "target": "2",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "0",
+        "target": "3",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "3",
+        "target": "4",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "0",
+        "target": "5",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "5",
+        "target": "6",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "6",
+        "target": "7",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "0",
+        "target": "8",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "8",
+        "target": "9",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      },
+      {
+        "source": "9",
+        "target": "10",
+        "metadata": {
+          "subsystem": "containment"
+        }
+      }
+    ]
+  }
+}

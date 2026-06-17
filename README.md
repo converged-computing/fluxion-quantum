@@ -227,6 +227,18 @@ E.g., `graph → match → allocate → QRMI job → result`
 
 And next we can actually integrate this into Kubernetes, paried with traditional resources, and likely a custom scheduler plugin. Stay tuned!
 
+### Multiple Vendors
+
+```bash
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/device-region-east.yaml --retval
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/device-region-missing.yaml --retval
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/hybrid-constraint.yaml --retval
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/no-constraint-qpu.yaml --retval
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/unsatisfied-cores.yaml --retval
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/virtual-false.yaml --retval
+./bin/fluxion-quantum --conf conf/quantum-vendors.json --spec queries/virtual-true.yaml --retval
+```
+
 ### Debugging
 
 When I first tested a session I was getting 400 errors, and I needed more detail. I ran:

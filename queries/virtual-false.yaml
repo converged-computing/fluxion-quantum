@@ -1,0 +1,21 @@
+# EXPECT: SATISFIED. One core under a virtual=false node (node0 or node1).
+# Proves: virtual=false constraint selects physical compute and PRUNES the
+# virtual qdevice nodes (they carry virtual=true, not virtual=false).
+version: 9999
+resources:
+  - type: slot
+    count: 1
+    label: default
+    with:
+      - type: core
+        count: 1
+attributes:
+  system:
+    duration: 0
+    constraints:
+      properties: ["virtual=false"]
+tasks:
+  - command: ["app"]
+    slot: default
+    count:
+      per_slot: 1
